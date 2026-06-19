@@ -154,6 +154,11 @@ accuracy_before = sr.evaluate(X=list(X_train), y=list(y_train))
 print(f"\nAccuracy BEFORE optimization: {accuracy_before * 100:.2f}%")
 print(f"{50*'='}\n")
 
+# fit() method trains and optimizes data, 
+# The router converts your query into vector(using the embedding model)
+# Then it calculates the similarity between your query's vector and the pre-defined utterances in your routes
+# if the highest similarity score is above threshold, it matches that route. otherwise it returns None
+
 print("Running router.fit() to optimize thresholds...")
 sr.fit(X=list(X_train), y=list(y_train))
 print("\nOptimized thresholds:")
