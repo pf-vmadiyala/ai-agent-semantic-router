@@ -1,79 +1,135 @@
 # AI Agent & Semantic Router Playground
 
-Welcome to the **AI Agent & Semantic Router Playground**! This repository is a step-by-step learning environment designed to build, understand, and optimize custom AI Agents, conversational memory, persistent database checkpointers, and semantic routing classification.
+## 📖 Overview
+This repository is a learning playground that demonstrates how to build, extend, and optimise AI agents for financial research. It walks through a series of incremental milestones, showcasing:
+- **Agent construction** with LangChain and Groq.
+- **Short‑term memory** using LangGraph check‑pointing.
+- **Persistent memory** backed by SQLite.
+- **Semantic routing** to dispatch queries to specialised sub‑agents.
+- **A custom, LangChain‑free implementation** that directly uses the Groq SDK.
 
 ---
 
-## 📂 Project Architecture & Milestones
+## 📚 Table of Contents
+- [Project Structure](#project-structure)
+- [Setup & Installation](#setup--installation)
+- [Usage Examples](#usage-examples)
+- [Contribution Guidelines](#contribution-guidelines)
+- [License](#license)
 
-This project is structured as a progression of five milestones:
+---
+
+## 🏗️ Project Structure & Milestones
+The project is organised as a linear progression of five milestones. Each milestone adds a new capability and is represented by a dedicated script.
 
 ```mermaid
 graph TD
-    M1[1. Basic Agent] --> M2[2. Short-Term Memory]
-    M2 --> M3[3. Persistent SQLite Memory]
-    M3 --> M4[4. Semantic Router]
-    M4 --> M5[5. Custom Agent from Scratch]
+    M1[1️⃣ Basic Agent] --> M2[2️⃣ Short‑Term Memory]
+    M2 --> M3[3️⃣ Persistent SQLite Memory]
+    M3 --> M4[4️⃣ Semantic Router]
+    M4 --> M5[5️⃣ Custom Agent (no LangChain)]
 ```
 
-### 1. Basic Agent (`basic_agent.py`)
-* **Goal**: Build a financial research analyst agent (`FinBot`) using LangChain and ChatGroq.
-* **Tools**:
-  * Stock Fundamentals (`yfinance`)
-  * Latest Financial News (`YahooFinanceNewsTool`)
-  * Robust Wikipedia Search (custom wrapper handling redirects, ambiguities, and errors)
-  * Last 24h Google News Search (`SerpAPIWrapper`)
-* **Command to run**: `uv run python basic_agent.py`
-
-### 2. In-Memory Session Memory (`agent_with_memory.py`)
-* **Goal**: Enable the agent to keep context across multi-turn messages within a conversation thread.
-* **Implementation**: Uses LangGraph's `InMemorySaver` checkpointer and unique `thread_id` configurations.
-* **Testing**: Demonstrates that the agent understands pronouns (e.g., *"it"* in *"How does it compare to NVDA?"*) by recalling previous prompts.
-* **Command to run**: `uv run python agent_with_memory.py`
-
-### 3. Persistent SQLite Memory (`agent_persistant_memory.py`)
-* **Goal**: Persist message context securely across multiple process restarts.
-* **Implementation**: Uses LangGraph's `SqliteSaver` checkpointer to save message histories in a local `finance_agent.db` database.
-* **Testing**: Running the script a second time recalls your name and interest without sending them in the prompt again.
-* **Command to run**: `uv run python agent_persistant_memory.py`
-
-### 4. Semantic Router & Optimization (`agent_semantic_router.py`)
-* **Goal**: Setup a zero-latency routing layer using `semantic-router` and a local HuggingFace embedding model (`Qwen/Qwen3-Embedding-0.6B`) to classify queries.
-* **Implementation**: Routes queries into `stock_analysis`, `market_news`, `general_finance`, or Out-of-Scope (`None`).
-* **Optimization**: Benchmarks accuracy before and after running `router.fit()` (Threshold Optimization) to build customized boundary limits.
-* **Command to run**: `uv run python agent_semantic_router.py`
-
-### 5. Custom Agent Without LangChain (`custom_agent.py`)
-* **Goal**: Build a pure-Python tool-calling agent using the raw `groq` SDK to understand the internal event loop.
-* **Implementation**: Handles JSON tool declarations, calls Groq, parses tool invocation requests, runs local Python functions, appends results, and loops back recursively.
-* **Command to run**: `uv run python custom_agent.py`
+| Milestone | Script | Key Feature |
+|-----------|--------|-------------|
+| **1️⃣ Basic Agent** | `basic_agent.py` | Financial analyst bot (`FinBot`) using LangChain, Groq, yfinance, YahooFinanceNewsTool, Wikipedia wrapper, SerpAPI news. |
+| **2️⃣ Short‑Term Memory** | `agent_with_memory.py` | In‑memory conversation context with LangGraph `InMemorySaver`. |
+| **3️⃣ Persistent SQLite Memory** | `agent_persistant_memory.py` | Durable context across restarts using LangGraph `SqliteSaver` and `finance_agent.db`. |
+| **4️⃣ Semantic Router** | `agent_semantic_router.py` | Zero‑latency query routing via `semantic-router` + local Qwen embedding model. |
+| **5️⃣ Custom Agent** | `custom_agent.py` | Pure‑Python tool‑calling agent built on the Groq SDK (no LangChain). |
 
 ---
 
-## 🛠️ Installation & Setup
+## 🛠️ Setup & Installation
+The project relies on **uv** – a fast Python package manager and environment tool.
 
-This repository uses **`uv`**, the ultra-fast Python package manager.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/<your‑username>/ai-agent-semantic-router-playground.git
+   cd ai-agent-semantic-router-playground
+   ```
 
-### 1. Install Dependencies
-Initialize the environment and sync packages from `pyproject.toml` automatically:
+2. **Create and activate a virtual environment** (uv does this automatically when you run commands, but you can also create one manually):
+   ```bash
+   uv venv
+   source .venv/bin/activate   # on Windows use `.venv\Scripts\activate`
+   ```
+
+3. **Install dependencies**
+   ```bash
+   uv sync
+   ```
+
+4. **Configure environment variables** – copy the template below into a file named `.env` at the project root:
+   ```env
+   GROQ_API_KEY=your_groq_api_key_here
+   GROQ_MODEL=openai/gpt-oss-safeguard-20b   # or any other Groq model you prefer
+   SERPAPI_API_KEY=your_serpapi_api_key_here
+   ```
+   *Both keys are required for the news‑search tools.*
+
+---
+
+## 🚀 Usage Examples
+Each milestone can be executed independently. Below are quick commands to try them out.
+
+### 1️⃣ Basic Agent
 ```bash
-uv sync
+uv run python basic_agent.py
 ```
+The agent will ask for a ticker symbol, fetch fundamentals, recent news, and provide a short analysis.
 
-### 2. Configure Environment Variables
-Create a `.env` file in the root directory:
-```env
-GROQ_API_KEY=your_groq_api_key_here
-GROQ_MODEL=openai/gpt-oss-safeguard-20b
-SERPAPI_API_KEY=your_serpapi_api_key_here
+### 2️⃣ Agent with Short‑Term Memory
+```bash
+uv run python agent_with_memory.py
 ```
+You can have a multi‑turn conversation. The agent remembers prior messages within the same thread.
+
+### 3️⃣ Persistent SQLite Memory
+```bash
+uv run python agent_persistant_memory.py
+```
+Run the script, answer the initial prompts, then stop it (`Ctrl‑C`). Running it again will automatically recall the stored context from `finance_agent.db`.
+
+### 4️⃣ Semantic Router
+```bash
+uv run python agent_semantic_router.py
+```
+Enter a query – the router will classify it into one of the specialised sub‑agents (`stock_analysis`, `market_news`, `general_finance`) or return *Out‑of‑Scope* for unrelated topics.
+
+### 5️⃣ Custom Agent (no LangChain)
+```bash
+uv run python custom_agent.py
+```
+A lightweight agent that demonstrates raw tool‑calling using the Groq SDK. It parses tool requests, runs local Python functions, and feeds results back to the model.
 
 ---
 
-## 📈 Optimization Results (Semantic Router)
+## 🤝 Contribution Guidelines
+We welcome contributions! Follow these steps to propose improvements:
 
-After defining our dataset and training the router, we observe a significant improvement in accuracy by optimizing thresholds:
+1. **Fork the repository** on GitHub.
+2. **Create a new branch** for your feature or bug‑fix:
+   ```bash
+   git checkout -b my‑feature‑branch
+   ```
+3. **Make your changes** – keep code style consistent (PEP 8) and add or update documentation as needed.
+4. **Run tests** (if any) and ensure the scripts still execute with `uv run`.
+5. **Commit with a clear message**:
+   ```bash
+   git commit -m "feat: add X feature"   # or "fix: resolve Y bug"
+   ```
+6. **Push to your fork** and open a Pull Request against the `main` branch.
+7. **Fill the PR template** – describe the problem, the solution, and any relevant screenshots or logs.
 
-* **Accuracy Before Optimization**: ~68.57% (using standard/generic boundaries)
-* **Accuracy After Optimization (`fit()`)**: ~71.43% (up to +2.86 percentage point improvement)
-* **Out-of-Scope Filter**: Accurately filters out random queries like *" banana bread recipe"* or *"weekend movies"* without executing expensive LLM runs.
+### Code of Conduct
+Please be respectful and inclusive. Harassment or discriminatory language will not be tolerated.
+
+---
+
+## 📄 License
+This project is licensed under the **MIT License** – see the `LICENSE` file for details.
+
+---
+
+*Happy hacking!*
