@@ -19,4 +19,6 @@ dependencies = [
     "torch>=2.12.1",
     "transformers>=5.12.1",
     "tokenizers>=0.22.0,<=0.23.0",
+    "ipython>=9.14.1",
+    "grandalf>=0.8",
 ]
